@@ -1,384 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TheBullMarket.io — Navigate the Crypto Surge</title>
-<meta name="description" content="Daily crypto news, altcoin analysis, and market routines from TheBullMarket.io.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0A0E0D;
-    --bg-alt:#0D1310;
-    --surface:#121814;
-    --surface-2:#161F1A;
-    --border:#1E2A22;
-    --border-soft:#192019;
-    --text:#EAF6EF;
-    --text-muted:#8FA79C;
-    --text-dim:#5C6E66;
-    --accent:#00FF66;
-    --accent-dim:#00CC52;
-    --accent-soft:rgba(0,255,102,0.10);
-    --accent-soft-strong:rgba(0,255,102,0.18);
-    --red:#FF3B5C;
-    --font-display:'Space Grotesk',sans-serif;
-    --font-body:'Inter',sans-serif;
-    --font-mono:'JetBrains Mono',monospace;
-    --maxw:1220px;
-  }
-
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font-body);
-    line-height:1.5;
-    -webkit-font-smoothing:antialiased;
-  }
-  img{max-width:100%;display:block;}
-  a{color:inherit;text-decoration:none;}
-  ul{list-style:none;}
-  button{font-family:inherit;cursor:pointer;}
-  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
-  ::selection{background:var(--accent);color:#04140A;}
-  :focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
-
-  /* faint background grid texture */
-  body{
-    background-image:
-      linear-gradient(var(--border-soft) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
-    background-size:64px 64px;
-    background-position:center top;
-  }
-
-  /* ===== TICKER STRIP ===== */
-  .ticker-bar{
-    background:var(--bg-alt);
-    border-bottom:1px solid var(--border);
-    overflow:hidden;
-    white-space:nowrap;
-    position:relative;
-  }
-  .ticker-track{
-    display:inline-flex;
-    align-items:center;
-    animation:ticker-scroll 32s linear infinite;
-    padding:8px 0;
-  }
-  .ticker-bar:hover .ticker-track{animation-play-state:paused;}
-  .ticker-item{
-    font-family:var(--font-mono);
-    font-size:12px;
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:0 22px;
-    border-right:1px solid var(--border);
-    color:var(--text-muted);
-    letter-spacing:0.02em;
-  }
-  .ticker-item .sym{color:var(--text);font-weight:600;}
-  .ticker-item .up{color:var(--accent);}
-  .ticker-item .down{color:var(--red);}
-  @keyframes ticker-scroll{
-    from{transform:translateX(0);}
-    to{transform:translateX(-50%);}
-  }
-
-  /* ===== HEADER ===== */
-  header{
-    position:sticky;top:0;z-index:100;
-    background:rgba(10,14,13,0.85);
-    backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--border);
-  }
-  .nav{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:16px 24px;
-  }
-  .logo{
-    display:flex;align-items:center;gap:10px;
-    font-family:var(--font-display);
-    font-size:19px;font-weight:700;
-    color:var(--text);
-    letter-spacing:-0.01em;
-  }
-  .logo .dot{color:var(--accent);}
-  .logo-mark{width:30px;height:30px;flex-shrink:0;}
-  .nav-links{display:flex;align-items:center;gap:2px;}
-  .nav-links a{
-    font-size:14px;font-weight:500;color:var(--text-muted);
-    padding:9px 14px;border-radius:7px;
-    transition:color .15s ease, background .15s ease;
-  }
-  .nav-links a:hover{color:var(--text);background:var(--surface);}
-  .nav-cta{
-    display:flex;align-items:center;gap:14px;
-  }
-  .btn{
-    display:inline-flex;align-items:center;gap:8px;
-    font-family:var(--font-body);
-    font-weight:600;font-size:14px;
-    padding:10px 20px;border-radius:8px;
-    border:1px solid transparent;
-    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
-  }
-  .btn-primary{
-    background:var(--accent);color:#04140A;
-  }
-  .btn-primary:hover{
-    box-shadow:0 0 0 3px var(--accent-soft), 0 8px 24px -8px var(--accent);
-    transform:translateY(-1px);
-  }
-  .btn-ghost{
-    border-color:var(--border);color:var(--text);
-  }
-  .btn-ghost:hover{background:var(--surface);border-color:var(--accent-dim);}
-
-  .menu-toggle{
-    display:none;
-    background:none;border:1px solid var(--border);
-    border-radius:7px;width:38px;height:38px;
-    align-items:center;justify-content:center;color:var(--text);
-  }
-  .menu-toggle svg{width:18px;height:18px;}
-
-  /* ===== HERO ===== */
-  .hero{
-    position:relative;
-    overflow:hidden;
-    padding:88px 24px 72px;
-    border-bottom:1px solid var(--border);
-  }
-  .hero-inner{
-    max-width:var(--maxw);margin:0 auto;
-    position:relative;z-index:2;
-    display:grid;
-    grid-template-columns:1.1fr 0.9fr;
-    gap:48px;
-    align-items:center;
-  }
-  .eyebrow{
-    display:inline-flex;align-items:center;gap:8px;
-    font-family:var(--font-mono);font-size:12px;
-    color:var(--accent);
-    background:var(--accent-soft);
-    border:1px solid rgba(0,255,102,0.25);
-    padding:6px 12px;border-radius:100px;
-    margin-bottom:22px;
-  }
-  .eyebrow .pulse{
-    width:6px;height:6px;border-radius:50%;background:var(--accent);
-    box-shadow:0 0 0 0 rgba(0,255,102,.7);
-    animation:pulse 1.8s infinite;
-  }
-  @keyframes pulse{
-    0%{box-shadow:0 0 0 0 rgba(0,255,102,.55);}
-    70%{box-shadow:0 0 0 8px rgba(0,255,102,0);}
-    100%{box-shadow:0 0 0 0 rgba(0,255,102,0);}
-  }
-  .hero h1{
-    font-family:var(--font-display);
-    font-size:clamp(34px,5vw,58px);
-    line-height:1.05;
-    font-weight:700;
-    letter-spacing:-0.02em;
-    margin-bottom:20px;
-  }
-  .hero h1 .grad{
-    background:linear-gradient(90deg,var(--accent),#7CFFB0);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .hero p{
-    font-size:17px;color:var(--text-muted);
-    max-width:520px;margin-bottom:32px;
-  }
-  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
-  .hero-stats{
-    display:flex;gap:28px;margin-top:44px;flex-wrap:wrap;
-  }
-  .hero-stat b{
-    display:block;font-family:var(--font-display);font-size:22px;color:var(--text);
-  }
-  .hero-stat span{font-size:12px;color:var(--text-dim);font-family:var(--font-mono);}
-
-  .chart-card{
-    position:relative;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:22px 22px 0;
-    overflow:hidden;
-  }
-  .chart-card-head{
-    display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:6px;
-  }
-  .chart-card-head .pair{font-family:var(--font-mono);font-size:13px;color:var(--text);font-weight:600;}
-  .chart-card-head .price{font-family:var(--font-mono);font-size:19px;color:var(--accent);font-weight:600;}
-  .chart-card-sub{font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-bottom:14px;}
-
-  /* ===== ADSTERRA AD CONTAINER STYLING ===== */
-  .adsterra-ad-container {
-    max-width: var(--maxw);
-    margin: 30px auto;
-    padding: 0 24px;
-    text-align: center;
-  }
-
-  /* ===== FOUNDER ===== */
-  .founder{
-    background:var(--bg-alt);
-    border-top:1px solid var(--border);
-    border-bottom:1px solid var(--border);
-    padding: 60px 24px;
-  }
-  .founder-inner{
-    max-width:var(--maxw);margin:0 auto;
-    display:grid;grid-template-columns:280px 1fr;gap:52px;align-items:center;
-  }
-  .founder-portrait{
-    position:relative;
-    width:100%;aspect-ratio:1/1;
-    border-radius:16px;
-    background:var(--surface);
-    border:1px solid var(--border);
-    overflow:hidden;
-  }
-  .founder-portrait img{width:100%;height:100%;object-fit:cover;display:block;}
-
-  /* ===== RESPONSIVE ===== */
-  @media (max-width:980px){
-    .hero-inner{grid-template-columns:1fr;}
-    .chart-card{order:-1;}
-    .founder-inner{grid-template-columns:1fr;gap:32px;}
-    .founder-portrait{max-width:240px;}
-  }
-  @media (max-width:720px){
-    .nav-links{display:none;}
-    .menu-toggle{display:flex;}
-    .nav-cta .btn-ghost{display:none;}
-    .hero{padding:56px 20px 48px;}
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        p {
+            font-size: 14px;
+            color: #8b949e;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            display: inline-block;
+            background: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+            border: 1px solid rgba(46, 160, 67, 0.4);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<!-- ===== TICKER STRIP ===== -->
-<div class="ticker-bar" aria-label="Live market ticker">
-  <div class="ticker-track" id="tickerTrack">
-    <div class="ticker-item"><span class="sym">BTC/USD</span> <span id="ticker-btc">Loading...</span></div>
-    <div class="ticker-item"><span class="sym">ETH/USD</span> <span id="ticker-eth">Loading...</span></div>
-    <div class="ticker-item"><span class="sym">SOL/USD</span> <span id="ticker-sol">Loading...</span></div>
-    <div class="ticker-item"><span class="sym">BNB/USD</span> <span id="ticker-bnb">Loading...</span></div>
-  </div>
-</div>
-
-<!-- ===== HEADER ===== -->
-<header>
-  <div class="nav wrap">
-    <a href="#top" class="logo">
-      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 24L11 15L16 19L28 6" stroke="#00FF66" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M21 6H28V13" stroke="#00FF66" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      TheBullMarket<span class="dot">.io</span>
-    </a>
-    <nav class="nav-links" aria-label="Primary">
-      <a href="#top">Home</a>
-      <a href="#news">Crypto News</a>
-      <a href="#analysis">Altcoin Analysis</a>
-      <a href="#routine">Daily Market Routine</a>
-      <a href="#founder">About Me</a>
-    </nav>
-    <div class="nav-cta">
-      <a href="#" class="btn btn-ghost">Subscribe</a>
-      <a href="#news" class="btn btn-primary">Latest Blogs</a>
+    <div class="container">
+        <h1>Live Location Tracker</h1>
+        <p>Location coordinates updates originate directly from browser Geolocation API and are transmitted to Realtime Database.</p>
+        <div class="status-badge">System Active</div>
     </div>
-  </div>
-</header>
 
-<main id="top">
-  <!-- ===== HERO ===== -->
-  <section class="hero">
-    <div class="hero-inner">
-      <div>
-        <div class="eyebrow"><span class="pulse"></span> DAILY MARKET COVERAGE — UPDATED PRE-MARKET</div>
-        <h1>Navigate the <span class="grad">Crypto Surge</span> with Expert Insights</h1>
-        <p>Real-time analytics, technical charts, and breakdown of altcoin trends.</p>
-        <div class="hero-actions">
-          <a href="#news" class="btn btn-primary">Explore Insights</a>
-        </div>
-      </div>
+    <!-- Firebase Scripts (Zaroori hain taake Firebase chale) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-      <!-- Real-Time Chart Card -->
-      <div class="chart-card">
-        <div class="chart-card-head">
-          <span class="pair">BITCOIN / USD</span>
-          <span class="price" id="hero-btc-price">$0,000.00</span>
-        </div>
-        <div class="chart-card-sub" id="hero-btc-change">+0.00% 24h</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== ADSTERRA AD PLACEMENT ===== -->
-  <div class="adsterra-ad-container">
-    <script async="async" data-cfasync="false" src="https://pl31021123.profitableratecpmnetwork.com/ed1e3c1a64f4b7d39d66ed30ad88a3f0/invoke.js"></script>
-    <div id="container-ed1e3c1a64f4b7d39d66ed30ad88a3f0"></div>
-  </div>
-
-  <!-- ===== FOUNDER SECTION ===== -->
-  <section class="founder" id="founder">
-    <div class="founder-inner">
-      <div class="founder-portrait">
-        <!-- Live Profile Image Link -->
-        <img src="Screenshot_20260708_182359.jpg" alt="Founder Portrait">
-      </div>
-      <div>
-        <h2>About the Founder</h2>
-        <p style="color:var(--text-muted)">Welcome to TheBullMarket.io! Providing you with deep technical analysis and key market trends daily.</p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<!-- ===== COINGECKO REAL-TIME API SCRIPT ===== -->
-<script>
-async function fetchCryptoPrices() {
-  try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true');
-    const data = await res.json();
-
-    // Update Hero Section Price
-    if (data.bitcoin) {
-      document.getElementById('hero-btc-price').innerText = '$' + data.bitcoin.usd.toLocaleString();
-      const change = data.bitcoin.usd_24h_change.toFixed(2);
-      document.getElementById('hero-btc-change').innerText = (change >= 0 ? '+' : '') + change + '% 24h';
-      document.getElementById('hero-btc-change').style.color = change >= 0 ? '#00FF66' : '#FF3B5C';
-    }
-
-    // Update Ticker Bar Prices
-    if (data.bitcoin) document.getElementById('ticker-btc').innerText = '$' + data.bitcoin.usd.toLocaleString();
-    if (data.ethereum) document.getElementById('ticker-eth').innerText = '$' + data.ethereum.usd.toLocaleString();
-    if (data.solana) document.getElementById('ticker-sol').innerText = '$' + data.solana.usd.toLocaleString();
-    if (data.binancecoin) document.getElementById('ticker-bnb').innerText = '$' + data.binancecoin.usd.toLocaleString();
-
-  } catch (err) {
-    console.error('Error fetching crypto prices:', err);
-  }
-}
-
-// Fetch prices immediately on load, then every 30 seconds
-fetchCryptoPrices();
-setInterval(fetchCryptoPrices, 30000);
-</script>
+    <!-- Aap ki apni script.js file link karne ke liye -->
+    <script src="script.js"></script>
 
 </body>
-    </html>
-    
+</html>
