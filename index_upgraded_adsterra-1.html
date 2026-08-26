@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#07100b">
+<title>TheBullMarket.io — Live Crypto Analytics</title>
+<meta name="description" content="Live Binance crypto prices, interactive charts, technical market analysis and crypto news.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#070b09;--bg2:#0b110d;--surface:#101812;--surface2:#151f18;
+  --border:#1e2b23;--text:#ecf8f0;--muted:#8da297;--dim:#5d7167;
+  --green:#00f56a;--green2:#00c955;--red:#ff4d67;--yellow:#f0c94d;
+  --max:1240px;--radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif;
+  line-height:1.5;-webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(rgba(30,43,35,.28) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(30,43,35,.28) 1px,transparent 1px);
+  background-size:64px 64px;
+}
+a{color:inherit;text-decoration:none} button,input,select,textarea{font:inherit}
+button{cursor:pointer}.wrap{max-width:var(--max);margin:auto;padding:0 20px}
+.mono{font-family:"JetBrains Mono",monospace}
+.green{color:var(--green)}.red{color:var(--red)}.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+.ticker{height:36px;background:#050805;border-bottom:1px solid var(--border);overflow:hidden;white-space:nowrap}
+.ticker-track{display:inline-flex;min-width:max-content;height:100%;align-items:center;animation:scroll 32s linear infinite}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ti{padding:0 22px;border-right:1px solid var(--border);font:11px "JetBrains Mono",monospace;color:var(--muted)}
+.ti b{color:var(--text);margin-right:6px}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+header{
+  position:sticky;top:0;z-index:100;background:rgba(7,11,9,.88);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--border)
+}
+.nav{height:66px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{font:700 20px "Space Grotesk",sans-serif}.logo span{color:var(--green)}
+.navlinks{display:flex;gap:4px}.navlinks a{font-size:13px;color:var(--muted);padding:9px 12px;border-radius:8px}
+.navlinks a:hover{background:var(--surface);color:var(--text)}
+.mobile-menu{display:none;background:transparent;border:1px solid var(--border);color:var(--text);padding:7px 10px;border-radius:8px}
+
+.hero{padding:38px 0 26px}
+.hero-title{font:700 clamp(30px,5vw,54px)/1.05 "Space Grotesk",sans-serif;max-width:850px}
+.hero-title span{color:var(--green)}
+.hero-sub{margin-top:13px;color:var(--muted);max-width:720px;font-size:14px}
+.live-row{display:flex;align-items:center;gap:10px;margin-top:18px;font:11px "JetBrains Mono",monospace}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+.dot.off{background:var(--red);box-shadow:none}
+
+.section{padding:26px 0 46px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}
+.section-title{font:700 24px "Space Grotesk",sans-serif}.section-note{font:11px "JetBrains Mono",monospace;color:var(--dim)}
+
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.price-card,.chart-card,.indicator,.analysis-card,.founder,.adbox{
+  background:linear-gradient(145deg,var(--surface),#0c130f);
+  border:1px solid var(--border);border-radius:var(--radius)
+}
+.price-card{padding:16px;min-width:0}
+.pc-top{display:flex;justify-content:space-between;align-items:center}
+.coin{font:700 15px "Space Grotesk",sans-serif}.pair{font:10px "JetBrains Mono",monospace;color:var(--dim)}
+.price{font:700 24px "JetBrains Mono",monospace;margin:14px 0 3px;overflow:hidden;text-overflow:ellipsis}
+.change{font:11px "JetBrains Mono",monospace}
+.spark{height:30px;margin-top:10px}
+
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.chart-card{padding:16px;overflow:hidden}
+.chart-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.chart-title{font:700 15px "Space Grotesk",sans-serif}
+.chart-meta{font:10px "JetBrains Mono",monospace;color:var(--muted)}
+canvas{display:block;width:100%;height:280px}
+.chart-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font:11px "JetBrains Mono",monospace;background:rgba(16,24,18,.65)}
+.canvas-wrap{position:relative}
+
+.dashboard-grid{display:grid;grid-template-columns:1.6fr .8fr;gap:16px}
+.indicator{padding:18px}
+.ind-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.badge{font:600 10px "JetBrains Mono",monospace;padding:4px 8px;border-radius:99px;background:rgba(0,245,106,.1);color:var(--green)}
+.badge.warn{background:rgba(240,201,77,.12);color:var(--yellow)}
+.badge.bear{background:rgba(255,77,103,.12);color:var(--red)}
+.rsi{margin:12px 0 18px}.rsi-line{display:flex;justify-content:space-between;font:11px "JetBrains Mono",monospace;color:var(--muted);margin-bottom:7px}
+.rsi-bg{height:9px;border-radius:9px;background:var(--surface2);overflow:hidden}
+.rsi-fill{height:100%;border-radius:9px;background:var(--green);transition:width .4s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--border-soft,#19221c);padding:12px;border-radius:9px}
+.stat label{display:block;font:9px "JetBrains Mono",monospace;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.stat strong{font:600 13px "JetBrains Mono",monospace}
+.sentiment{padding:20px;text-align:center}
+.sentiment-value{font:700 42px "Space Grotesk",sans-serif;margin:12px 0 3px;color:var(--green)}
+.sentiment small{color:var(--muted);font:10px "JetBrains Mono",monospace}
+.sentiment-bar{height:12px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));border-radius:10px;margin:20px 0 7px;position:relative}
+.sentiment-pin{position:absolute;top:-5px;width:4px;height:22px;background:white;border-radius:3px;left:50%}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.filter{background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:8px 13px;border-radius:99px;font-size:12px}
+.filter.active,.filter:hover{border-color:var(--green);color:var(--green);background:rgba(0,245,106,.07)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.analysis-card{padding:18px;display:flex;flex-direction:column;min-height:190px}
+.card-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:12px}
+.tag{font:10px "JetBrains Mono",monospace;color:var(--green);background:rgba(0,245,106,.08);padding:4px 7px;border-radius:5px}
+.date{font:9px "JetBrains Mono",monospace;color:var(--dim)}
+.analysis-card h3{font:600 16px/1.3 "Space Grotesk",sans-serif;margin-bottom:9px}
+.analysis-card p{font-size:12px;color:var(--muted);line-height:1.55}
+.empty{padding:30px;text-align:center;border:1px dashed var(--border);border-radius:12px;color:var(--muted);grid-column:1/-1;font:12px "JetBrains Mono",monospace}
+
+.adbox{min-height:90px;display:grid;place-items:center;margin:8px 0 26px;border-style:dashed;color:var(--dim);font:10px "JetBrains Mono",monospace}
+.adbox small{display:block;text-align:center}
+.adsterra-slot{width:100%;min-height:90px}
+
+.founder{padding:24px;display:flex;gap:20px;align-items:center}
+.avatar{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:rgba(0,245,106,.1);border:1px solid var(--green);color:var(--green);font:700 22px "Space Grotesk",sans-serif}
+.founder h3{font:700 18px "Space Grotesk",sans-serif}.founder p{color:var(--muted);font-size:12px;margin-top:4px}
+
+footer{border-top:1px solid var(--border);padding:28px 0 50px;color:var(--dim);font-size:11px}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+
+.fab{position:fixed;right:18px;bottom:18px;z-index:150;border:0;border-radius:99px;background:var(--green);color:#031008;font:700 12px "Space Grotesk",sans-serif;padding:12px 17px;box-shadow:0 8px 30px rgba(0,245,106,.2)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:18px;z-index:500}
+.modal.show{display:flex}.modal-card{width:min(520px,100%);background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px}
+.modal-head{display:flex;justify-content:space-between;margin-bottom:18px}.close{background:transparent;border:0;color:var(--muted);font-size:24px}
+.form-group{margin-bottom:13px}.form-group label{display:block;color:var(--muted);font:10px "JetBrains Mono",monospace;margin-bottom:6px}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green)}
+.submit{width:100%;border:0;border-radius:8px;background:var(--green);color:#031008;padding:11px;font-weight:700}
+.notice{font-size:10px;color:var(--dim);margin-top:10px;line-height:1.5}
+
+@media(max-width:900px){
+  .price-grid{grid-template-columns:1fr 1fr}.dashboard-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}
+  .navlinks{display:none}.mobile-menu{display:block}
+  .navlinks.open{display:flex;position:absolute;left:20px;right:20px;top:60px;flex-direction:column;background:var(--surface);border:1px solid var(--border);padding:8px}
+}
+@media(max-width:620px){
+  .wrap{padding:0 14px}.hero{padding-top:28px}.price-grid,.chart-grid,.cards{grid-template-columns:1fr}
+  .price{font-size:21px}.chart-card canvas{height:230px}.section{padding-bottom:32px}.founder{align-items:flex-start}
+}
+</style>
+</head>
+<body>
+
+<div class="ticker"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<header>
+  <div class="wrap nav">
+    <a href="#top" class="logo">TheBullMarket<span>.io</span></a>
+    <nav class="navlinks" id="navlinks">
+      <a href="#market">Market</a>
+      <a href="#charts">Charts</a>
+      <a href="#indicators">Indicators</a>
+      <a href="#analysis">Analysis</a>
+      <a href="#about">Founder</a>
+    </nav>
+    <button class="mobile-menu" id="menuBtn">☰</button>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero wrap">
+  <h1 class="hero-title">Crypto markets.<br><span>Live data. Clear analysis.</span></h1>
+  <p class="hero-sub">Real-time Binance prices, interactive market charts and technical market information in one lightweight dashboard.</p>
+  <div class="live-row"><span class="dot" id="liveDot"></span><span id="connectionText">Connecting to Binance…</span><span>•</span><span id="lastUpdate">--:--:--</span></div>
+</section>
+
+<section class="section wrap" id="market">
+  <div class="section-head"><h2 class="section-title">Live Market</h2><span class="section-note">BINANCE • USDT</span></div>
+  <div class="price-grid" id="priceGrid"></div>
+</section>
+
+<div class="wrap">
+  <div class="adbox">
+    <!-- ADSTERRA: paste your official Adsterra ad code inside this box -->
+    <div class="adsterra-slot">
+      <script async="async" data-cfasync="false" src="https://pl31021123.profitableratecpmnetwork.com/ed1e3c1a64f4b7d39d66ed30ad88a3f0/invoke.js"></script>
+<div id="container-ed1e3c1a64f4b7d39d66ed30ad88a3f0"></div>
+    </div>
+  </div>
+</div>
+
+<section class="section wrap" id="charts">
+  <div class="section-head"><h2 class="section-title">4 Live Interactive Charts</h2><span class="section-note">1H CANDLES • AUTO UPDATE</span></div>
+  <div class="chart-grid" id="chartGrid"></div>
+</section>
+
+<section class="section wrap" id="indicators">
+  <div class="section-head"><h2 class="section-title">Technical Dashboard</h2><span class="section-note">LIVE PRICE BASED</span></div>
+  <div class="dashboard-grid">
+    <div class="indicator">
+      <div class="ind-head"><strong id="indicatorTitle">BTC / USDT</strong><span class="badge" id="signalBadge">LIVE</span></div>
+      <div class="rsi">
+        <div class="rsi-line"><span>RSI-style momentum</span><b id="rsiValue">--</b></div>
+        <div class="rsi-bg"><div class="rsi-fill" id="rsiFill" style="width:50%"></div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><label>Live Price</label><strong id="indPrice">--</strong></div>
+        <div class="stat"><label>24H Change</label><strong id="indChange">--</strong></div>
+        <div class="stat"><label>24H High</label><strong id="indHigh">--</strong></div>
+        <div class="stat"><label>24H Low</label><strong id="indLow">--</strong></div>
+      </div>
+    </div>
+    <div class="indicator sentiment">
+      <div class="section-note">MARKET MOMENTUM</div>
+      <div class="sentiment-value" id="momentumValue">--</div>
+      <small id="momentumText">Waiting for live data</small>
+      <div class="sentiment-bar"><div class="sentiment-pin" id="momentumPin"></div></div>
+      <small>Weak ← Momentum → Strong</small>
+    </div>
+  </div>
+</section>
+
+<section class="section wrap" id="analysis">
+  <div class="section-head"><h2 class="section-title">Analysis & Market Feeds</h2><span class="section-note">YOUR CONTENT</span></div>
+  <div class="filters">
+    <button class="filter active" data-filter="All">All Feeds</button>
+    <button class="filter" data-filter="BTC">Bitcoin</button>
+    <button class="filter" data-filter="Altcoins">Altcoins</button>
+    <button class="filter" data-filter="Routine">Daily Routine</button>
+  </div>
+  <div class="cards" id="postsContainer"></div>
+</section>
+
+<section class="section wrap" id="about">
+  <div class="section-head"><h2 class="section-title">About TheBullMarket.io</h2></div>
+  <div class="founder">
+    <div class="avatar">TB</div>
+    <div>
+      <h3>Founder & Editor</h3>
+      <p>Independent crypto market content, live data and educational technical analysis.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap footer-row"><span>© 2026 TheBullMarket.io</span><span>Data: Binance public market streams • Educational information only</span></div></footer>
+
+<button class="fab" id="openModal">+ Add Post</button>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <div class="modal-head"><h3>Create Market Feed</h3><button class="close" id="closeModal">×</button></div>
+    <form id="postForm">
+      <div class="form-group"><label>POST TITLE</label><input id="postTitle" required placeholder="e.g. Bitcoin momentum improves"></div>
+      <div class="form-group"><label>CATEGORY</label><select id="postCategory"><option>BTC</option><option>Altcoins</option><option>Routine</option></select></div>
+      <div class="form-group"><label>TAG</label><input id="postTag" required placeholder="BTC/USDT"></div>
+      <div class="form-group"><label>SUMMARY</label><textarea id="postSnippet" rows="4" required placeholder="Write your market analysis…"></textarea></div>
+      <button class="submit" type="submit">Publish Post</button>
+      <p class="notice">This standalone replacement saves posts in this browser using localStorage. It does not require the missing script.js file.</p>
+    </form>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================
+   CONFIG
+========================= */
+const COINS = [
+  {symbol:"BTCUSDT", name:"BTC", label:"Bitcoin"},
+  {symbol:"ETHUSDT", name:"ETH", label:"Ethereum"},
+  {symbol:"BNBUSDT", name:"BNB", label:"BNB"},
+  {symbol:"SOLUSDT", name:"SOL", label:"Solana"}
+];
+
+const state = {
+  prices:{},
+  charts:{},
+  socket:null,
+  reconnectTimer:null,
+  activeFilter:"All"
+};
+
+const fmt = (n) => {
+  if (!Number.isFinite(n)) return "--";
+  if (n >= 1000) return n.toLocaleString(undefined,{maximumFractionDigits:2});
+  if (n >= 1) return n.toLocaleString(undefined,{maximumFractionDigits:4});
+  return n.toLocaleString(undefined,{maximumFractionDigits:6});
+};
+
+const pct = (n) => Number.isFinite(n) ? `${n>=0?"+":""}${n.toFixed(2)}%` : "--";
+
+function timeNow(){
+  return new Date().toLocaleTimeString([], {hour12:false});
+}
+
+/* =========================
+   PRICE CARDS
+========================= */
+function buildPriceCards(){
+  const grid=document.getElementById("priceGrid");
+  grid.innerHTML=COINS.map(c=>`
+    <article class="price-card" data-symbol="${c.symbol}">
+      <div class="pc-top"><div><div class="coin">${c.name}</div><div class="pair">${c.symbol}</div></div><span class="dot" style="width:6px;height:6px"></span></div>
+      <div class="price" id="price-${c.name}">--</div>
+      <div class="change" id="change-${c.name}">Waiting…</div>
+      <canvas class="spark" id="spark-${c.name}" width="300" height="40"></canvas>
+    </article>
+  `).join("");
+}
+
+/* =========================
+   LIVE BINANCE
+========================= */
+function setConnection(ok){
+  document.getElementById("liveDot").classList.toggle("off",!ok);
+  document.getElementById("connectionText").textContent = ok ? "Binance live stream connected" : "Binance connection unavailable — retrying…";
+}
+
+function applyTicker(d){
+  const symbol=d.s||d.symbol;
+  const coin=COINS.find(c=>c.symbol===symbol);
+  if(!coin) return;
+  const price=Number(d.c);
+  const change=Number(d.P);
+  const high=Number(d.h), low=Number(d.l);
+  state.prices[symbol]={price,change,high,low};
+  const p=document.getElementById(`price-${coin.name}`);
+  const ch=document.getElementById(`change-${coin.name}`);
+  if(p) p.textContent="$"+fmt(price);
+  if(ch){
+    ch.textContent=pct(change);
+    ch.className="change "+(change>=0?"green":"red");
+  }
+  document.getElementById("lastUpdate").textContent=timeNow();
+
+  if(symbol==="BTCUSDT") updateIndicator({price,change,high,low});
+}
+
+function connectWS(){
+  try{ if(state.socket) state.socket.close(); }catch(e){}
+  const streams=COINS.map(c=>c.symbol.toLowerCase()+"@ticker").join("/");
+  const url=`wss://stream.binance.com:9443/stream?streams=${streams}`;
+  const ws=new WebSocket(url);
+  state.socket=ws;
+  ws.onopen=()=>setConnection(true);
+  ws.onmessage=e=>{
+    try{
+      const payload=JSON.parse(e.data);
+      if(payload.data) applyTicker(payload.data);
+    }catch(err){}
+  };
+  ws.onerror=()=>setConnection(false);
+  ws.onclose=()=>{
+    setConnection(false);
+    clearTimeout(state.reconnectTimer);
+    state.reconnectTimer=setTimeout(connectWS,5000);
+  };
+}
+
+async function restFallback(){
+  try{
+    const r=await fetch("https://api.binance.com/api/v3/ticker/24hr?symbols="+encodeURIComponent(JSON.stringify(COINS.map(c=>c.symbol))),{cache:"no-store"});
+    if(!r.ok) throw new Error("API");
+    const data=await r.json();
+    data.forEach(d=>applyTicker(d));
+  }catch(e){}
+}
+
+/* =========================
+   CHARTS
+   Uses Binance klines + Canvas
+========================= */
+function buildCharts(){
+  const grid=document.getElementById("chartGrid");
+  grid.innerHTML=COINS.map(c=>`
+    <article class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">${c.name} / USDT</div>
+        <div class="chart-meta" id="meta-${c.name}">Loading 1H…</div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="chart-${c.name}" width="700" height="340"></canvas>
+        <div class="chart-loading" id="load-${c.name}">Loading Binance candles…</div>
+      </div>
+    </article>
+  `).join("");
+}
+
+async function loadKlines(coin){
+  try{
+    const url=`https://api.binance.com/api/v3/klines?symbol=${coin.symbol}&interval=1h&limit=90`;
+    const r=await fetch(url,{cache:"no-store"});
+    if(!r.ok) throw new Error("Kline API");
+    const rows=await r.json();
+    const candles=rows.map(x=>({t:x[0],o:+x[1],h:+x[2],l:+x[3],c:+x[4]}));
+    state.charts[coin.symbol]=candles;
+    drawChart(coin);
+    document.getElementById(`load-${coin.name}`).classList.add("hidden");
+    document.getElementById(`meta-${coin.name}`).textContent="1H • Binance";
+  }catch(e){
+    document.getElementById(`load-${coin.name}`).textContent="Chart data unavailable — retrying…";
+    setTimeout(()=>loadKlines(coin),15000);
+  }
+}
+
+function drawChart(coin){
+  const canvas=document.getElementById(`chart-${coin.name}`);
+  if(!canvas) return;
+  const ctx=canvas.getContext("2d");
+  const data=state.charts[coin.symbol];
+  if(!data || data.length<2) return;
+
+  const dpr=window.devicePixelRatio||1;
+  const cssW=canvas.clientWidth||700, cssH=canvas.clientHeight||280;
+  canvas.width=Math.floor(cssW*dpr);canvas.height=Math.floor(cssH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+
+  const pad={l:10,r:52,t:15,b:20};
+  const w=cssW-pad.l-pad.r,h=cssH-pad.t-pad.b;
+  const lows=data.map(x=>x.l), highs=data.map(x=>x.h);
+  const min=Math.min(...lows),max=Math.max(...highs);
+  const range=(max-min)||1;
+  const x=i=>pad.l+(i/(data.length-1))*w;
+  const y=v=>pad.t+(1-(v-min)/range)*h;
+
+  ctx.strokeStyle="rgba(141,162,151,.12)";ctx.lineWidth=1;
+  for(let i=0;i<4;i++){
+    const yy=pad.t+(h*i/3);
+    ctx.beginPath();ctx.moveTo(pad.l,yy);ctx.lineTo(pad.l+w,yy);ctx.stroke();
+  }
+
+  ctx.beginPath();
+  data.forEach((c,i)=>{const xx=x(i),yy=y(c.c);i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});
+  ctx.strokeStyle="#00f56a";ctx.lineWidth=2;ctx.stroke();
+
+  const last=data[data.length-1];
+  ctx.fillStyle="#00f56a";ctx.beginPath();ctx.arc(x(data.length-1),y(last.c),3.5,0,Math.PI*2);ctx.fill();
+
+  ctx.fillStyle="#8da297";ctx.font='10px "JetBrains Mono",monospace';
+  ctx.textAlign="left";ctx.fillText("$"+fmt(max),cssW-pad.r+6,pad.t+4);
+  ctx.fillText("$"+fmt(min),cssW-pad.r+6,pad.t+h);
+  ctx.fillText("$"+fmt(last.c),cssW-pad.r+6,Math.max(12,Math.min(cssH-5,y(last.c))));
+}
+
+async function refreshCharts(){
+  await Promise.all(COINS.map(loadKlines));
+}
+window.addEventListener("resize",()=>COINS.forEach(drawChart));
+
+/* =========================
+   INDICATOR
+========================= */
+function updateIndicator(d){
+  document.getElementById("indPrice").textContent="$"+fmt(d.price);
+  document.getElementById("indChange").textContent=pct(d.change);
+  document.getElementById("indHigh").textContent="$"+fmt(d.high);
+  document.getElementById("indLow").textContent="$"+fmt(d.low);
+
+  const momentum=Math.max(0,Math.min(100,50+d.change*4));
+  const rsi=Math.round(momentum);
+  document.getElementById("rsiValue").textContent=rsi;
+  document.getElementById("rsiFill").style.width=rsi+"%";
+  const badge=document.getElementById("signalBadge");
+  badge.className="badge "+(rsi>=65?"":"warn");
+  badge.textContent=rsi>=65?"BULLISH":rsi<=35?"BEARISH":"NEUTRAL";
+
+  document.getElementById("momentumValue").textContent=rsi;
+  document.getElementById("momentumPin").style.left=`calc(${rsi}% - 2px)`;
+  document.getElementById("momentumText").textContent=rsi>=65?"Strong positive momentum":rsi<=35?"Weak / negative momentum":"Neutral market momentum";
+}
+
+/* =========================
+   TICKER
+========================= */
+function buildTicker(){
+  const items=COINS.map(c=>`<div class="ti"><b>${c.name}/USDT</b><span id="tick-${c.name}">--</span></div>`).join("");
+  document.getElementById("tickerTrack").innerHTML=items+items;
+}
+function updateTicker(){
+  COINS.forEach(c=>{
+    const p=state.prices[c.symbol];
+    const el=document.getElementById(`tick-${c.name}`);
+    if(p&&el){el.textContent="$"+fmt(p.price)+" "+pct(p.change);el.className=p.change>=0?"green":"red";}
+  });
+}
+
+/* =========================
+   POSTS — localStorage
+========================= */
+const defaultPosts=[
+  {title:"Live Binance market dashboard is online",category:"Routine",tag:"MARKET",snippet:"Live prices and 1H market charts are connected directly to Binance public market data.",date:new Date().toLocaleDateString()},
+  {title:"Bitcoin market watch",category:"BTC",tag:"BTC/USDT",snippet:"Use the live chart and 24H statistics above to monitor price momentum before making any decision.",date:new Date().toLocaleDateString()},
+  {title:"Altcoin watchlist",category:"Altcoins",tag:"ETH • BNB • SOL",snippet:"Track the four featured USDT pairs from one responsive dashboard.",date:new Date().toLocaleDateString()}
+];
+
+function getPosts(){
+  try{
+    const p=JSON.parse(localStorage.getItem("tbm_posts")||"null");
+    return Array.isArray(p)&&p.length?p:defaultPosts;
+  }catch(e){return defaultPosts}
+}
+function savePosts(p){localStorage.setItem("tbm_posts",JSON.stringify(p))}
+
+function renderPosts(filter=state.activeFilter){
+  state.activeFilter=filter;
+  const posts=getPosts().filter(p=>filter==="All"||p.category===filter);
+  const box=document.getElementById("postsContainer");
+  if(!posts.length){box.innerHTML='<div class="empty">No posts in this category yet.</div>';return}
+  box.innerHTML=posts.map((p,i)=>`
+    <article class="analysis-card">
+      <div class="card-meta"><span class="tag">${escapeHTML(p.tag)}</span><span class="date">${escapeHTML(p.date)}</span></div>
+      <h3>${escapeHTML(p.title)}</h3>
+      <p>${escapeHTML(p.snippet)}</p>
+    </article>
+  `).join("");
+}
+function escapeHTML(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+/* =========================
+   UI
+========================= */
+document.getElementById("menuBtn").onclick=()=>document.getElementById("navlinks").classList.toggle("open");
+document.querySelectorAll(".navlinks a").forEach(a=>a.onclick=()=>document.getElementById("navlinks").classList.remove("open"));
+
+document.querySelectorAll(".filter").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));
+    btn.classList.add("active");renderPosts(btn.dataset.filter);
+  };
+});
+
+const modal=document.getElementById("modal");
+document.getElementById("openModal").onclick=()=>modal.classList.add("show");
+document.getElementById("closeModal").onclick=()=>modal.classList.remove("show");
+modal.addEventListener("click",e=>{if(e.target===modal)modal.classList.remove("show")});
+
+document.getElementById("postForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const posts=getPosts();
+  posts.unshift({
+    title:document.getElementById("postTitle").value.trim(),
+    category:document.getElementById("postCategory").value,
+    tag:document.getElementById("postTag").value.trim(),
+    snippet:document.getElementById("postSnippet").value.trim(),
+    date:new Date().toLocaleDateString()
+  });
+  savePosts(posts);renderPosts();e.target.reset();modal.classList.remove("show");
+});
+
+/* =========================
+   START
+========================= */
+buildPriceCards();buildTicker();buildCharts();renderPosts();
+connectWS();
+restFallback();
+refreshCharts();
+setInterval(updateTicker,1000);
+setInterval(restFallback,30000);
+setInterval(refreshCharts,60000);
+</script>
+</body>
+</html>
